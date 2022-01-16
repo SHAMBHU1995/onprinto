@@ -1,7 +1,7 @@
 <?php
 return [
     'backend' => [
-        'frontName' => 'zpanel'
+        'frontName' => 'zpane'
     ],
     'queue' => [
         'consumers_wait_for_messages' => 1

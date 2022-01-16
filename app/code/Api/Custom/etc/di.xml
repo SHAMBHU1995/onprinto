@@ -3,4 +3,7 @@
 
     <preference for="Api\Custom\Api\ProductInterface" type="Api\Custom\Model\Product" />
     
+    <preference for="Api\Custom\Api\CategoryInterface" type="Api\Custom\Model\Category" />
+    
+    
 </config>

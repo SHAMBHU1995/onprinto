@@ -38,9 +38,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $collection = $this->_productCollectionFactory->create()
                     ->addAttributeToSelect('*')
                     ->addAttributeToFilter('status', array('eq' => 1))
-                    ->addAttributeToFilter('visibility', array('eq' => 4))
-                    ->addAttributeToFilter('sku', array('like' => $sku.'%'))
-                    ->addAttributeToFilter('name', array('like' => $name.'%'))
+                    ->addAttributeToFilter('sku', array('like' => '%'. $sku.'%'))
+                    ->addAttributeToFilter('name', array('like' => '%'. $name.'%'))
                     ->addStoreFilter()
                     ->load();
         return $collection;

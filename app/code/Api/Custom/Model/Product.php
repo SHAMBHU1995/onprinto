@@ -12,12 +12,8 @@ class Product  implements \Api\Custom\Api\ProductInterface
     $this->helperData = $helperData;
   }
 
-/**
- * Undocumented function
- *
- * @return string
- */
-  public function search(): string {
+
+  public function search() {
 
     $json_str = file_get_contents('php://input');
     $json_obj = json_decode($json_str,true);
@@ -33,6 +29,7 @@ class Product  implements \Api\Custom\Api\ProductInterface
           $message = "Invalid Api token";
           $data =  array('code' => $code , 'message' => $message );
           echo json_encode($data);die;
+
         }
     }else{
       $code = 0;
@@ -54,19 +51,11 @@ class Product  implements \Api\Custom\Api\ProductInterface
         $result[] = $product->getData();
       }
       $code = 1;
-      $data =  array(
-        'code' => $code,
-        'product' => $result 
-      );
+      $data =  array('code' => $code , 'product' => $result );
       echo json_encode($data);die;
     }
 
-    
-    
-    
   }
-
-
 
 }
 

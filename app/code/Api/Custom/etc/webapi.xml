@@ -1,15 +1,15 @@
 <?xml version="1.0"?>
 <routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
 
-    <route url="/V1/customers/authenticate" method="GET">
-        <service class="Magento\Customer\Api\AccountManagementInterface" method="authenticate"/>
+    <route url="/V1/product/search" method="POST">
+        <service class="Api\Custom\Api\ProductInterface" method="search"/>
         <resources>
             <resource ref="anonymous"/>
         </resources>
     </route>
 
-    <route url="/V1/product/search" method="POST">
-        <service class="Api\Custom\Api\ProductInterface" method="search"/>
+    <route url="/V1/category/list" method="POST">
+        <service class="Api\Custom\Api\CategoryInterface" method="list"/>
         <resources>
             <resource ref="anonymous"/>
         </resources>

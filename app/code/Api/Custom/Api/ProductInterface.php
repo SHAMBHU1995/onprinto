@@ -3,9 +3,11 @@ namespace Api\Custom\Api;
 
 interface ProductInterface
 {
-   /**
-     * @return string
-     */
+  /**
+   * Undocumented function
+   *
+   * @return void
+   */
    public function search();
 
 }
