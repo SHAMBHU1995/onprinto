@@ -1,7 +1,7 @@
 <?php
 return [
     'backend' => [
-        'frontName' => 'zpane'
+        'frontName' => 'zpanel'
     ],
     'queue' => [
         'consumers_wait_for_messages' => 1
@@ -13,10 +13,10 @@ return [
         'table_prefix' => '',
         'connection' => [
             'default' => [
-                'host' => '127.0.0.1',
+                'host' => '3.93.56.125',
                 'dbname' => 'onprinto',
                 'username' => 'root',
-                'password' => 'EF#m&s.;H8fa',
+                'password' => 'JMTFwA6=GCeq',
                 'model' => 'mysql4',
                 'engine' => 'innodb',
                 'initStatements' => 'SET NAMES utf8;',
