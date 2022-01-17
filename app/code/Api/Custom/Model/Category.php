@@ -3,7 +3,7 @@ namespace Api\Custom\Model;
 
 use Api\Custom\Api\CategoryInterface;
 
-class Category  implements CategoryInterface
+class Category  implements \Api\Custom\Api\CategoryInterface
 {
     public function __construct(
         \Magento\Catalog\Block\Adminhtml\Category\Tree $adminCategoryTree
