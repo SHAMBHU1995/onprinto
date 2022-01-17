@@ -1,0 +1,2 @@
+email,_website,_store,confirmation,created_at,created_in,disable_auto_group_change,dob,failures_num,firstname,first_failure,gender,group_id,lastname,lock_expires,middlename,password_hash,prefix,rp_token,rp_token_created_at,store_id,suffix,taxvat,updated_at,website_id,password
+abcd@gmail.com,base,default,,"2022-01-10 07:49:26","Default Store View",0,,0,FirstName,,0,1,LastName,,,,,I4ZCPM2azc24YQ0uW8fvQ1e46qo0FWkH,"2022-01-10 07:49:26",1,,,"2022-01-10 07:49:26",1,
