@@ -1,5 +1,85 @@
 Magento Functional Testing Framework Changelog
 ================================================
+3.5.1
+---------
+
+### GitHub Pull Requests:
+
+* [#825](https://github.com/magento/magento2-functional-testing-framework/pull/825) -- Update allure-codeception in order to support php8
+
+
+3.5.0
+---------
+
+### Enhancements
+
+* Customizability
+    * Added new `config:parallel --groups` option in `generate:tests` command to generate and split tests/suites into required number of execution time balanced groups. 
+
+### Fixes
+
+* Added --no-sandbox chrome option in functional suite configuration.
+
+### GitHub Pull Requests:
+
+* [#824](https://github.com/magento/magento2-functional-testing-framework/pull/824) -- Fix typo in introduction.md
+* [#816](https://github.com/magento/magento2-functional-testing-framework/pull/816) -- Update mftf.md
+* [#812](https://github.com/magento/magento2-functional-testing-framework/pull/812) -- Added examples and modified url links in assertions.md
+
+3.4.0
+---------
+
+### Enhancements
+
+* Maintainability
+  * Added support for composer 2.
+    
+3.3.0
+---------
+
+### Enhancements
+
+* Usability
+  * [#817](https://github.com/magento/magento2-functional-testing-framework/pull/817) -- Add support for admin WebAPI token refresh.
+    
+* Maintainability
+  * [#814](https://github.com/magento/magento2-functional-testing-framework/pull/814) -- Update dependencies in order to make mftf php8 compatible, fix running phpcpd
+  * [#815](https://github.com/magento/magento2-functional-testing-framework/pull/815) -- Upgrade csharpru/vault-php to 4.1  
+    
+### Fixes
+
+* Fixed test generation error in a split suite group (--config=parallel) to allow generation of subsequent groups.
+* Fixed an issue where test extends from a skipped parent is not properly skipped.
+
+3.2.1
+---------
+
+### Fixes
+
+* Fixed issue that causes Magento bin/magento to fail when xdebug 3 is used. [GitHub Issue #808](https://github.com/magento/magento2-functional-testing-framework/issues/808)
+
+### GitHub Pull Requests:
+
+  * [#806](https://github.com/magento/magento2-functional-testing-framework/pull/806) -- Enable an extending entity to overwrite a requiredEntity binding
+  * [#809](https://github.com/magento/magento2-functional-testing-framework/pull/809) -- Add MFTF documentation for AWS S3
+
+3.2.0
+---------
+
+### Enhancements
+
+* Usability
+  * Introduced error tolerance during test and suite generation. See the [command page](./docs/commands/mftf.md#error-tolerance-during-generation) for details.
+    Addressed github issue [#276](https://github.com/magento/magento2-functional-testing-framework/issues/276).
+    
+* Maintainability    
+  * Updated annotation static-check to check all required annotations.
+
+### Fixes
+
+* Fixed issue where CUSTOM_MODULE_PATHS env variable does not use all paths.
+* Fixed issue where run:test only records the last failed test in `failed` file.
+
 3.1.1
 ---------
 
@@ -35,7 +115,7 @@ Fixed issue with XPath locators for waits in MagentoPwaWebDriver.
 
 * Fixed issue with suite precondition failure for `createData` with required entity.
 
-### GitHub Issues/Pull requests:
+### GitHub Issues/Pull Requests:
 
   * [#547](https://github.com/magento/magento2-functional-testing-framework/pull/547) -- Fix invalid behavior of MAGENTO_BACKEND_BASE_URL
   * [#742](https://github.com/magento/magento2-functional-testing-framework/pull/742) -- Fix Waits In MagentoPwaWebDriver

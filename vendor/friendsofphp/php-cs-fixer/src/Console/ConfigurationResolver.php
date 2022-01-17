@@ -33,7 +33,7 @@ use PhpCsFixer\Linter\Linter;
 use PhpCsFixer\Linter\LinterInterface;
 use PhpCsFixer\Report\ReporterFactory;
 use PhpCsFixer\Report\ReporterInterface;
-use PhpCsFixer\RuleSet;
+use PhpCsFixer\RuleSet\RuleSet;
 use PhpCsFixer\StdinFileInfo;
 use PhpCsFixer\ToolInfoInterface;
 use PhpCsFixer\Utils;
@@ -193,9 +193,13 @@ final class ConfigurationResolver
     public function getCacheManager()
     {
         if (null === $this->cacheManager) {
-            if ($this->getUsingCache() && ($this->toolInfo->isInstalledAsPhar() || $this->toolInfo->isInstalledByComposer())) {
+            $cacheFile = $this->getCacheFile();
+
+            if (null === $cacheFile) {
+                $this->cacheManager = new NullCacheManager();
+            } else {
                 $this->cacheManager = new FileCacheManager(
-                    new FileHandler($this->getCacheFile()),
+                    new FileHandler($cacheFile),
                     new Signature(
                         PHP_VERSION,
                         $this->toolInfo->getVersion(),
@@ -206,8 +210,6 @@ final class ConfigurationResolver
                     $this->isDryRun(),
                     $this->getDirectory()
                 );
-            } else {
-                $this->cacheManager = new NullCacheManager();
             }
         }
 
@@ -515,6 +517,8 @@ final class ConfigurationResolver
             }
         }
 
+        $this->usingCache = $this->usingCache && ($this->toolInfo->isInstalledAsPhar() || $this->toolInfo->isInstalledByComposer());
+
         return $this->usingCache;
     }
 
@@ -769,7 +773,7 @@ final class ConfigurationResolver
             if (isset($rules[$fixerName]) && $fixer instanceof DeprecatedFixerInterface) {
                 $successors = $fixer->getSuccessorsNames();
                 $messageEnd = [] === $successors
-                    ? sprintf(' and will be removed in version %d.0.', Application::getMajorVersion())
+                    ? sprintf(' and will be removed in version %d.0.', Application::getMajorVersion() + 1)
                     : sprintf('. Use %s instead.', str_replace('`', '"', Utils::naturalLanguageJoinWithBackticks($successors)));
 
                 $message = "Rule \"{$fixerName}\" is deprecated{$messageEnd}";

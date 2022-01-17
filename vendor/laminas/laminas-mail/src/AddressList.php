@@ -1,15 +1,10 @@
 <?php
 
-/**
- * @see       https://github.com/laminas/laminas-mail for the canonical source repository
- * @copyright https://github.com/laminas/laminas-mail/blob/master/COPYRIGHT.md
- * @license   https://github.com/laminas/laminas-mail/blob/master/LICENSE.md New BSD License
- */
-
 namespace Laminas\Mail;
 
 use Countable;
 use Iterator;
+use ReturnTypeWillChange;
 
 class AddressList implements Countable, Iterator
 {
@@ -96,6 +91,7 @@ class AddressList implements Countable, Iterator
     public function addFromString($address, $comment = null)
     {
         $this->add(Address::fromString($address, $comment));
+        return $this;
     }
 
     /**
@@ -104,7 +100,7 @@ class AddressList implements Countable, Iterator
      * @param  AddressList $addressList
      * @return AddressList
      */
-    public function merge(AddressList $addressList)
+    public function merge(self $addressList)
     {
         foreach ($addressList as $address) {
             $this->add($address);
@@ -162,6 +158,7 @@ class AddressList implements Countable, Iterator
      *
      * @return int
      */
+    #[ReturnTypeWillChange]
     public function count()
     {
         return count($this->addresses);
@@ -174,6 +171,7 @@ class AddressList implements Countable, Iterator
      * empty.
      * @see addresses
      */
+    #[ReturnTypeWillChange]
     public function rewind()
     {
         return reset($this->addresses);
@@ -184,6 +182,7 @@ class AddressList implements Countable, Iterator
      *
      * @return Address
      */
+    #[ReturnTypeWillChange]
     public function current()
     {
         return current($this->addresses);
@@ -194,6 +193,7 @@ class AddressList implements Countable, Iterator
      *
      * @return string
      */
+    #[ReturnTypeWillChange]
     public function key()
     {
         return key($this->addresses);
@@ -206,6 +206,7 @@ class AddressList implements Countable, Iterator
      * internal array pointer, or false if there are no more elements.
      * @see addresses
      */
+    #[ReturnTypeWillChange]
     public function next()
     {
         return next($this->addresses);
@@ -216,6 +217,7 @@ class AddressList implements Countable, Iterator
      *
      * @return bool
      */
+    #[ReturnTypeWillChange]
     public function valid()
     {
         $key = key($this->addresses);

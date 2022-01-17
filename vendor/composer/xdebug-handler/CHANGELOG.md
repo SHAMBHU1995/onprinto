@@ -1,5 +1,12 @@
 ## [Unreleased]
 
+## [1.4.6] - 2021-03-25
+  * Fixed: fail restart if `proc_open` has been disabled in `disable_functions`.
+  * Fixed: enable Windows CTRL event handling in the restarted process.
+
+## [1.4.5] - 2020-11-13
+  * Fixed: use `proc_open` when available for correct FD forwarding to the restarted process.
+
 ## [1.4.4] - 2020-10-24
   * Fix: exception if 'pcntl_signal' is disabled.
 
@@ -66,7 +73,9 @@
   * Break: the following class was renamed:
     - `Composer\XdebugHandler` -> `Composer\XdebugHandler\XdebugHandler`
 
-[Unreleased]: https://github.com/composer/xdebug-handler/compare/1.4.4...HEAD
+[Unreleased]: https://github.com/composer/xdebug-handler/compare/1.4.6...HEAD
+[1.4.6]: https://github.com/composer/xdebug-handler/compare/1.4.5...1.4.6
+[1.4.5]: https://github.com/composer/xdebug-handler/compare/1.4.4...1.4.5
 [1.4.4]: https://github.com/composer/xdebug-handler/compare/1.4.3...1.4.4
 [1.4.3]: https://github.com/composer/xdebug-handler/compare/1.4.2...1.4.3
 [1.4.2]: https://github.com/composer/xdebug-handler/compare/1.4.1...1.4.2

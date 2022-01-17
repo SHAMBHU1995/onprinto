@@ -6,6 +6,8 @@
 namespace tests\util;
 
 use Magento\FunctionalTestingFramework\ObjectManager;
+use Magento\FunctionalTestingFramework\Suite\Handlers\SuiteObjectHandler;
+use Magento\FunctionalTestingFramework\Suite\SuiteGenerator;
 use Magento\FunctionalTestingFramework\Test\Handlers\TestObjectHandler;
 use Magento\FunctionalTestingFramework\Util\TestGenerator;
 use PHPUnit\Framework\TestCase;
@@ -81,6 +83,28 @@ abstract class MftfTestCase extends TestCase
     }
 
     /**
+     * Asserts that the given callback throws the given exception
+     *
+     * @param string $expectClass
+     * @param array $expectedMessages
+     * @param callable $callback
+     */
+    protected function assertExceptionRegex(string $expectClass, array $expectedMessages, callable $callback)
+    {
+        try {
+            $callback();
+        } catch (\Throwable $exception) {
+            $this->assertInstanceOf($expectClass, $exception, 'An invalid exception was thrown.');
+            foreach ($expectedMessages as $expectedMessage) {
+                $this->assertMatchesRegularExpression($expectedMessage, $exception->getMessage());
+            }
+            return;
+        }
+
+        $this->fail('No exception was thrown.');
+    }
+
+    /**
      * Clears test handler and object manager to force recollection of test data
      *
      * @throws \Exception
@@ -94,6 +118,16 @@ abstract class MftfTestCase extends TestCase
 
         // clear test object handler to force recollection of test data
         $property = new \ReflectionProperty(ObjectManager::class, 'instance');
+        $property->setAccessible(true);
+        $property->setValue(null);
+
+        // clear suite generator to force recollection of test data
+        $property = new \ReflectionProperty(SuiteGenerator::class, 'instance');
+        $property->setAccessible(true);
+        $property->setValue(null);
+
+        // clear suite object handler to force recollection of test data
+        $property = new \ReflectionProperty(SuiteObjectHandler::class, 'instance');
         $property->setAccessible(true);
         $property->setValue(null);
     }

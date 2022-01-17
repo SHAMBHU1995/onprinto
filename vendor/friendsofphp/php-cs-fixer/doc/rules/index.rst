@@ -190,7 +190,7 @@ Control Structure
 - `switch_case_space <./control_structure/switch_case_space.rst>`_
     Removes extra spaces between colon and case value.
 - `yoda_style <./control_structure/yoda_style.rst>`_
-    Write conditions in Yoda style (``true``), non-Yoda style (``false``) or ignore those conditions (``null``) based on configuration.
+    Write conditions in Yoda style (``true``), non-Yoda style (``['equal' => false, 'identical' => false, 'less_and_greater' => false]``) or ignore those conditions (``null``) based on configuration.
 
 Doctrine Annotation
 -------------------
@@ -476,7 +476,7 @@ Semicolon
 - `multiline_whitespace_before_semicolons <./semicolon/multiline_whitespace_before_semicolons.rst>`_
     Forbid multi-line whitespace before the closing semicolon or move the semicolon to the new line for chained calls.
 - `no_empty_statement <./semicolon/no_empty_statement.rst>`_
-    Remove useless semicolon statements.
+    Remove useless (semicolon) statements.
 - `no_multiline_whitespace_before_semicolons <./semicolon/no_multiline_whitespace_before_semicolons.rst>`_ *(deprecated)*
     Multi-line whitespace before closing semicolon are prohibited.
 - `no_singleline_whitespace_before_semicolons <./semicolon/no_singleline_whitespace_before_semicolons.rst>`_

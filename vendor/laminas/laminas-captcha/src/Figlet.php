@@ -1,14 +1,9 @@
 <?php
 
-/**
- * @see       https://github.com/laminas/laminas-captcha for the canonical source repository
- * @copyright https://github.com/laminas/laminas-captcha/blob/master/COPYRIGHT.md
- * @license   https://github.com/laminas/laminas-captcha/blob/master/LICENSE.md New BSD License
- */
-
 namespace Laminas\Captcha;
 
 use Laminas\Text\Figlet\Figlet as FigletManager;
+use Traversable;
 
 /**
  * Captcha based on figlet text rendering service
@@ -27,7 +22,7 @@ class Figlet extends AbstractWord
     /**
      * Constructor
      *
-     * @param  null|string|array|\Traversable $options
+     * @param null|string|array|Traversable $options
      */
     public function __construct($options = null)
     {

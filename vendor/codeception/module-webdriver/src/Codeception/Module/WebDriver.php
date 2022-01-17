@@ -49,77 +49,48 @@ use Facebook\WebDriver\WebDriverKeys;
 use Facebook\WebDriver\WebDriverSelect;
 
 /**
- * New generation Selenium WebDriver module.
+ * Run tests in real browsers using the W3C [WebDriver protocol](https://www.w3.org/TR/webdriver/).
+ * There are multiple ways of running browser tests using WebDriver:
  *
- * ## Local Testing
+ * ## Selenium (Recommended)
  *
- * ### Selenium
+ * * Java is required
+ * * NodeJS is required
+ * 
+ * The fastest way to get started is to [Install and launch Selenium using selenium-standalone NodeJS package](https://www.npmjs.com/package/selenium-standalone).
+ * 
+ * Launch selenium standalone in separate console window:
+ * 
+ * ```
+ * selenium-standalone start
+ * ```
  *
- * To run Selenium Server you need [Java](https://www.java.com/) as well as Chrome or Firefox browser installed.
- *
- * 1. Download [Selenium Standalone Server](http://docs.seleniumhq.org/download/)
- * 2. To use Chrome, install [ChromeDriver](https://sites.google.com/a/chromium.org/chromedriver/getting-started). To use Firefox, install [GeckoDriver](https://github.com/mozilla/geckodriver).
- * 3. Launch the Selenium Server: `java -jar selenium-server-standalone-3.xx.xxx.jar`. To locate Chromedriver binary use `-Dwebdriver.chrome.driver=./chromedriver` option. For Geckodriver use `-Dwebdriver.gecko.driver=./geckodriver`.
- * 4. Configure this module (in `acceptance.suite.yml`) by setting `url` and `browser`:
+ * Update configuration in `acceptance.suite.yml`:
  *
  * ```yaml
- *     modules:
- *        enabled:
- *           - WebDriver:
- *              url: 'http://localhost/'
- *              browser: chrome # 'chrome' or 'firefox'
+ * modules:
+ *    enabled:
+ *       - WebDriver:
+ *          url: 'http://localhost/'
+ *          browser: chrome # 'chrome' or 'firefox'
  * ```
- *
- * Launch Selenium Server before executing tests.
- *
- * ```
- * java -jar "/path/to/selenium-server-standalone-xxx.jar"
- * ```
- *
- * ### ChromeDriver
- *
- * To run tests in Chrome browser you may connect to ChromeDriver directly, without using Selenium Server.
- *
- * 1. Install [ChromeDriver](https://sites.google.com/a/chromium.org/chromedriver/getting-started).
- * 2. Launch ChromeDriver: `chromedriver --url-base=/wd/hub`
- * 3. Configure this module to use ChromeDriver port:
- *
+ * 
+ * ## Headless Chrome Browser
+ * 
+ * To enable headless mode (launch tests without showing a window) for Chrome browser using Selenium use this config in `acceptance.suite.yml`:
+ * 
  * ```yaml
- *     modules:
- *        enabled:
- *           - WebDriver:
- *              url: 'http://localhost/'
- *              window_size: false # disabled in ChromeDriver
- *              port: 9515
- *              browser: chrome
- *              capabilities:
- *                  "goog:chromeOptions": # additional chrome options
+ * modules:
+ *    enabled:
+ *       - WebDriver:
+ *          url: 'http://localhost/'
+ *          browser: chrome
+ *            capabilities:
+ *              chromeOptions:
+ *                args: ["--headless", "--disable-gpu"]
  * ```
- *
- * Additional [Chrome options](https://sites.google.com/a/chromium.org/chromedriver/capabilities) can be set in `goog:chromeOptions` capabilities. Note that Selenium 3.8 renamed this capability from `chromeOptions` to `goog:chromeOptions`.
- *
- *
- * ### PhantomJS
- *
- * PhantomJS is a [headless browser](https://en.wikipedia.org/wiki/Headless_browser) alternative to Selenium Server that implements
- * [the WebDriver protocol](https://code.google.com/p/selenium/wiki/JsonWireProtocol).
- * It allows you to run Selenium tests on a server without a GUI installed.
- *
- * 1. Download [PhantomJS](http://phantomjs.org/download.html)
- * 2. Run PhantomJS in WebDriver mode: `phantomjs --webdriver=4444`
- * 3. Configure this module (in `acceptance.suite.yml`) by setting url and `phantomjs` as browser:
- *
- * ```yaml
- *     modules:
- *        enabled:
- *           - WebDriver:
- *              url: 'http://localhost/'
- *              browser: phantomjs
- * ```
- *
- * Since PhantomJS doesn't give you any visual feedback, it's probably a good idea to install [Codeception\Extension\Recorder](http://codeception.com/extensions#CodeceptionExtensionRecorder) which gives you screenshots of how PhantomJS "sees" your pages.
- *
- * ### Headless Selenium in Docker
+ * 
+ * ## Headless Selenium in Docker
  *
  * Docker can ship Selenium Server with all its dependencies and browsers inside a single container.
  * Running tests inside Docker is as easy as pulling [official selenium image](https://github.com/SeleniumHQ/docker-selenium) and starting a container with Chrome:
@@ -128,8 +99,59 @@ use Facebook\WebDriver\WebDriverSelect;
  * docker run --net=host selenium/standalone-chrome
  * ```
  *
- * By using `--net=host` we allow selenium to access local websites.
+ * By using `--net=host` allow Selenium to access local websites.
  *
+ * ## Local Chrome and/or Firefox
+ *
+ * Tests can be executed directly throgh ChromeDriver or GeckoDriver (for Firefox). Consider using this option if you don't plan to use Selenium.
+ * 
+ * ### ChromeDriver
+ * 
+ * * Download and install [ChromeDriver](https://sites.google.com/chromium.org/driver/downloads?authuser=0)
+ * * Launch ChromeDriver in a separate console window: `chromedriver --url-base=/wd/hub`.
+ * 
+ * Configuration in `acceptance.suite.yml`:
+ *
+ * ```yaml
+ * modules:
+ *    enabled:
+ *       - WebDriver:
+ *          url: 'http://localhost/'
+ *          window_size: false # disabled in ChromeDriver
+ *          port: 9515
+ *          browser: chrome
+ *          capabilities:
+ *              chromeOptions:
+ *                  args: ["--headless", "--disable-gpu"] # Run Chrome in headless mode
+ *                  prefs:
+ *                      download.default_directory: "..."
+ * ```
+ * See here for additional [Chrome options](https://sites.google.com/a/chromium.org/chromedriver/capabilities)
+ *
+ *
+ * ### GeckoDriver
+ * 
+ * * [GeckoDriver])(https://github.com/mozilla/geckodriver/releases) must be installed 
+ * * Start GeckoDriver in a separate console window: `geckodriver`.
+ *  
+ * Configuration in `acceptance.suite.yml`:
+ *
+ * ```yaml
+ * modules:
+ *    enabled:
+ *       - WebDriver:
+ *          url: 'http://localhost/'
+ *          browser: firefox
+ *          path: ''
+ *          capabilities:
+ *              acceptInsecureCerts: true # allow self-signed certificates
+ *              moz:firefoxOptions:
+ *                  args: ["-headless"] # Run Firefox in headless mode
+ *                  prefs:
+ *                      intl.accept_languages: "de-AT" # Set HTTP-Header `Accept-Language: de-AT` for requests
+ * ```
+ * See here for [Firefox capabilities](https://developer.mozilla.org/en-US/docs/Web/WebDriver/Capabilities#List_of_capabilities)
+ * 
  * ## Cloud Testing
  *
  * Cloud Testing services can run your WebDriver tests in the cloud.
@@ -175,6 +197,32 @@ use Facebook\WebDriver\WebDriverSelect;
  *                  os_version: 10
  *                  browserstack.local: true # for local testing
  * ```
+ *
+ * ### LambdaTest
+ *
+ * 1. Create an account at [LambdaTest](https://www.lambdatest.com/) to get your username and access key
+ * 2. In the module configuration use the format `username`:`access key`@hub.lambdatest.com' for `host`
+ * 3. Configure `os` and `os_version` under `capabilities` to define the operating System
+ * 4. If your site is available only locally or via VPN you should use a tunnel app. In this case add capabilities.setCapability("tunnel",true);.
+ *
+ * ```yaml
+ *    modules:
+ *  enabled:
+ *    - WebDriver:
+ *       url: http://mysite.com
+ *       host: '<username>:<access key>@hub.lambdatest.com'
+ *       build: <your build name>
+ *       name: <your test name>
+ *       port: 80
+ *       browser: chrome
+ *       capabilities:
+ *           os: Windows
+ *           os_version: 10
+ *           browser_version: 86
+ *           resolution: 1366x768
+ *           tunnel: true # for local testing
+ * ```
+ *
  * ### TestingBot
  *
  * 1. Create an account at [TestingBot](https://testingbot.com/) to get your key and secret
@@ -196,7 +244,7 @@ use Facebook\WebDriver\WebDriverSelect;
  *
  * ## Configuration
  *
- * * `url` *required* - Starting URL for your app.
+ * * `url` *required* - Base URL for your app (amOnPage opens URLs relative to this setting).
  * * `browser` *required* - Browser to launch.
  * * `host` - Selenium server host (127.0.0.1 by default).
  * * `port` - Selenium server port (4444 by default).
@@ -211,8 +259,12 @@ use Facebook\WebDriver\WebDriverSelect;
  * * `pageload_timeout` - amount of time to wait for a page load to complete before throwing an error (default 0 seconds).
  * * `http_proxy` - sets http proxy server url for testing a remote server.
  * * `http_proxy_port` - sets http proxy server port
+ * * `ssl_proxy` - sets ssl(https) proxy server url for testing a remote server.
+ * * `ssl_proxy_port` - sets ssl(https) proxy server port
  * * `debug_log_entries` - how many selenium entries to print with `debugWebDriverLogs` or on fail (0 by default).
  * * `log_js_errors` - Set to true to include possible JavaScript to HTML report, or set to false (default) to deactivate.
+ * * `webdriver_proxy` - sets http proxy to tunnel requests to the remote Selenium WebDriver through
+ * * `webdriver_proxy_port` - sets http proxy server port to tunnel requests to the remote Selenium WebDriver through
  *
  * Example (`acceptance.suite.yml`)
  *
@@ -227,6 +279,27 @@ use Facebook\WebDriver\WebDriverSelect;
  *                  unexpectedAlertBehaviour: 'accept'
  *                  firefox_profile: '~/firefox-profiles/codeception-profile.zip.b64'
  * ```
+ *
+ * ## Loading Parts from other Modules
+ *
+ * While all Codeception modules are designed to work stand-alone, it's still possible to load *several* modules at once. To use e.g. the [Asserts module](https://codeception.com/docs/modules/Asserts) in your acceptance tests, just load it like this in your `acceptance.suite.yml`:
+ *
+ * ```yaml
+ * modules:
+ *     enabled:
+ *         - WebDriver
+ *         - Asserts
+ * ```
+ *
+ * However, when loading a framework module (e.g. [Symfony](https://codeception.com/docs/modules/Symfony)) like this, it would lead to a conflict: When you call `$I->amOnPage()`, Codeception wouldn't know if you want to access the page using WebDriver's `amOnPage()`, or Symfony's `amOnPage()`. That's why possibly conflicting modules are separated into "parts". Here's how to load just the "services" part from e.g. Symfony:
+ * ```yaml
+ * modules:
+ *     enabled:
+ *         - WebDriver
+ *         - Symfony:
+ *             part: services
+ * ```
+ * To find out which parts each module has, look at the "Parts" header on the module's page.
  *
  * ## Usage
  *
@@ -268,6 +341,20 @@ use Facebook\WebDriver\WebDriverSelect;
  * until it finally tries to find the form by XPath).
  * If speed is a concern, it's recommended you stick with explicitly specifying the locator type via the array syntax.
  *
+ * ### Get Scenario Metadata
+ *
+ * You can inject `\Codeception\Scenario` into your test to get information about the current configuration:
+ * ```php
+ * use Codeception\Scenario
+ * public function myTest(AcceptanceTester $I, Scenario $scenario)
+ * {
+ *     if ('firefox' === $scenario->current('browser')) {
+ *         // ...
+ *     }
+ * }
+ * ```
+ * See [Get Scenario Metadata](https://codeception.com/docs/07-AdvancedUsage#Get-Scenario-Metadata) for more information on `$scenario`.
+ *
  * ## Public Properties
  *
  * * `webDriver` - instance of `\Facebook\WebDriver\Remote\RemoteWebDriver`. Can be accessed from Helper classes for complex WebDriver interactions.
@@ -291,25 +378,27 @@ class WebDriver extends CodeceptionModule implements
 {
     protected $requiredFields = ['browser', 'url'];
     protected $config = [
-        'protocol'           => 'http',
-        'host'               => '127.0.0.1',
-        'port'               => '4444',
-        'path'               => '/wd/hub',
-        'start'              => true,
-        'restart'            => false,
-        'wait'               => 0,
-        'clear_cookies'      => true,
-        'window_size'        => false,
-        'capabilities'       => [],
-        'connection_timeout' => null,
-        'request_timeout'    => null,
-        'pageload_timeout'   => null,
-        'http_proxy'         => null,
-        'http_proxy_port'    => null,
-        'ssl_proxy'          => null,
-        'ssl_proxy_port'     => null,
-        'debug_log_entries'  => 0,
-        'log_js_errors'      => false
+        'protocol'             => 'http',
+        'host'                 => '127.0.0.1',
+        'port'                 => '4444',
+        'path'                 => '/wd/hub',
+        'start'                => true,
+        'restart'              => false,
+        'wait'                 => 0,
+        'clear_cookies'        => true,
+        'window_size'          => false,
+        'capabilities'         => [],
+        'connection_timeout'   => null,
+        'request_timeout'      => null,
+        'pageload_timeout'     => null,
+        'http_proxy'           => null,
+        'http_proxy_port'      => null,
+        'ssl_proxy'            => null,
+        'ssl_proxy_port'       => null,
+        'debug_log_entries'    => 0,
+        'log_js_errors'        => false,
+        'webdriver_proxy'      => null,
+        'webdriver_proxy_port' => null,
     ];
 
     protected $wdHost;
@@ -319,10 +408,8 @@ class WebDriver extends CodeceptionModule implements
     protected $test;
     protected $sessions = [];
     protected $sessionSnapshots = [];
-    protected $httpProxy;
-    protected $httpProxyPort;
-    protected $sslProxy;
-    protected $sslProxyPort;
+    protected $webdriverProxy;
+    protected $webdriverProxyPort;
 
     /**
      * @var RemoteWebDriver
@@ -361,12 +448,14 @@ class WebDriver extends CodeceptionModule implements
         }
         $this->connectionTimeoutInMs = $this->config['connection_timeout'] * 1000;
         $this->requestTimeoutInMs = $this->config['request_timeout'] * 1000;
+        $this->webdriverProxy = $this->config['webdriver_proxy'];
+        $this->webdriverProxyPort = $this->config['webdriver_proxy_port'];
         $this->loadFirefoxProfile();
     }
 
     /**
      * Change capabilities of WebDriver. Should be executed before starting a new browser session.
-     * This method expects a function to be passed which returns array or [WebDriver Desired Capabilities](https://github.com/php-webdriver/php-webdriver/blob/community/lib/Remote/DesiredCapabilities.php) object.
+     * This method expects a function to be passed which returns array or [WebDriver Desired Capabilities](https://github.com/php-webdriver/php-webdriver/blob/main/lib/Remote/DesiredCapabilities.php) object.
      * Additional [Chrome options](https://github.com/php-webdriver/php-webdriver/wiki/ChromeOptions) (like adding extensions) can be passed as well.
      *
      * ```php
@@ -714,6 +803,20 @@ class WebDriver extends CodeceptionModule implements
         }
     }
 
+    public function _saveElementScreenshot($selector, $filename)
+    {
+        if (!isset($this->webDriver)) {
+            $this->debug('WebDriver::_saveElementScreenshot method has been called when webDriver is not set');
+            return;
+        }
+        try {
+            $this->matchFirstOrFail($this->webDriver, $selector)->takeElementScreenshot($filename);
+        } catch (\Exception $e) {
+            $this->debug('Unable to retrieve element screenshot from Selenium : ' . $e->getMessage());
+            return;
+        }
+    }
+
     public function _findElements($locator)
     {
         return $this->match($this->webDriver, $locator);
@@ -761,6 +864,34 @@ class WebDriver extends CodeceptionModule implements
         }
         $screenName = $debugDir . DIRECTORY_SEPARATOR . $name . '.png';
         $this->_saveScreenshot($screenName);
+        $this->debugSection('Screenshot Saved', "file://$screenName");
+    }
+
+    /**
+     * Takes a screenshot of an element of the current window and saves it to `tests/_output/debug`.
+     *
+     * ``` php
+     * <?php
+     * $I->amOnPage('/user/edit');
+     * $I->makeElementScreenshot('#dialog', 'edit_page');
+     * // saved to: tests/_output/debug/edit_page.png
+     * $I->makeElementScreenshot('#dialog');
+     * // saved to: tests/_output/debug/2017-05-26_14-24-11_4b3403665fea6.png
+     * ```
+     *
+     * @param $name
+     */
+    public function makeElementScreenshot($selector, $name = null)
+    {
+        if (empty($name)) {
+            $name = uniqid(date("Y-m-d_H-i-s_"));
+        }
+        $debugDir = codecept_log_dir() . 'debug';
+        if (!is_dir($debugDir)) {
+            mkdir($debugDir, 0777);
+        }
+        $screenName = $debugDir . DIRECTORY_SEPARATOR . $name . '.png';
+        $this->_saveElementScreenshot($selector, $screenName);
         $this->debugSection('Screenshot Saved', "file://$screenName");
     }
 
@@ -1469,8 +1600,8 @@ class WebDriver extends CodeceptionModule implements
                 $this->capabilities,
                 $this->connectionTimeoutInMs,
                 $this->requestTimeoutInMs,
-                $this->httpProxy,
-                $this->httpProxyPort
+                $this->webdriverProxy,
+                $this->webdriverProxyPort
             );
             if (!is_null($this->config['pageload_timeout'])) {
                 $this->webDriver->manage()->timeouts()->pageLoadTimeout($this->config['pageload_timeout']);
@@ -1479,7 +1610,7 @@ class WebDriver extends CodeceptionModule implements
             $this->initialWindowSize();
         } catch (WebDriverCurlException $e) {
             codecept_debug('Curl error: ' . $e->getMessage());
-            throw new ConnectionException("Can't connect to Webdriver at {$this->wdHost}. Please make sure that Selenium Server or PhantomJS is running.");
+            throw new ConnectionException("Can't connect to WebDriver at {$this->wdHost}. Make sure that ChromeDriver, GeckoDriver or Selenium Server is running.");
         }
     }
 
@@ -1693,6 +1824,37 @@ class WebDriver extends CodeceptionModule implements
     {
         $el = $this->findField($field);
         $el->clear();
+    }
+
+    /**
+     * Type in characters on active element.
+     * With a second parameter you can specify delay between key presses. 
+     * 
+     * ```php
+     * <?php
+     * // activate input element
+     * $I->click('#input');
+     * 
+     * // type text in active element
+     * $I->type('Hello world');
+     * 
+     * // type text with a 1sec delay between chars
+     * $I->type('Hello World', 1);
+     * ```
+     * 
+     * This might be useful when you an input reacts to typing and you need to slow it down to emulate human behavior.
+     * For instance, this is how Credit Card fields can be filled in.
+     * 
+     * @param $text
+     * @param $delay [sec]
+     */
+    public function type($text, $delay = 0) {
+        $keys = str_split($text);
+        foreach ($keys as $key) {
+            sleep($delay);
+            $this->webDriver->getKeyboard()->pressKey($key);
+        }
+        sleep($delay);
     }
 
     public function attachFile($field, $filename)
@@ -2914,9 +3076,9 @@ class WebDriver extends CodeceptionModule implements
 
     /**
      * Presses the given key on the given element.
-     * To specify a character and modifier (e.g. ctrl, alt, shift, meta), pass an array for $char with
+     * To specify a character and modifier (e.g. <kbd>Ctrl</kbd>, Alt, Shift, Meta), pass an array for `$char` with
      * the modifier as the first element and the character as the second.
-     * For special keys use key constants from WebDriverKeys class.
+     * For special keys, use the constants from [`Facebook\WebDriver\WebDriverKeys`](https://github.com/php-webdriver/php-webdriver/blob/main/lib/WebDriverKeys.php).
      *
      * ``` php
      * <?php
@@ -3261,7 +3423,6 @@ class WebDriver extends CodeceptionModule implements
      * The tab is opened with JavaScript's `window.open()`, which means:
      * * Some adblockers might restrict it.
      * * The sessionStorage is copied to the new tab (contrary to a tab that was manually opened by the user)
-     * * It is not possible in PhantomJS.
      */
     public function openNewTab()
     {
@@ -3270,14 +3431,26 @@ class WebDriver extends CodeceptionModule implements
     }
 
     /**
+     * Checks current number of opened tabs
+     *
+     * ```php
+     * <?php
+     * $I->seeNumberOfTabs(2);
+     * ```
+     * @param $number number of tabs
+     */
+    public function seeNumberOfTabs($number)
+    {
+        $this->assertEquals(count($this->webDriver->getWindowHandles()), $number);
+    }    
+
+    /**
      * Closes current browser tab and switches to previous active tab.
      *
      * ```php
      * <?php
      * $I->closeTab();
      * ```
-     *
-     * Can't be used with PhantomJS
      */
     public function closeTab()
     {
@@ -3297,9 +3470,6 @@ class WebDriver extends CodeceptionModule implements
      * // switch to 2nd next tab
      * $I->switchToNextTab(2);
      * ```
-     *
-     * Can't be used with PhantomJS
-     *
      * @param int $offset 1
      */
     public function switchToNextTab($offset = 1)
@@ -3319,9 +3489,6 @@ class WebDriver extends CodeceptionModule implements
      * // switch to 2nd previous tab
      * $I->switchToPreviousTab(2);
      * ```
-     *
-     * Can't be used with PhantomJS
-     *
      * @param int $offset 1
      */
     public function switchToPreviousTab($offset = 1)

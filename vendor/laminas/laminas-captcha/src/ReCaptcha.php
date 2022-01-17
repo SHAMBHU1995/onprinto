@@ -1,15 +1,14 @@
 <?php
 
-/**
- * @see       https://github.com/laminas/laminas-captcha for the canonical source repository
- * @copyright https://github.com/laminas/laminas-captcha/blob/master/COPYRIGHT.md
- * @license   https://github.com/laminas/laminas-captcha/blob/master/LICENSE.md New BSD License
- */
-
 namespace Laminas\Captcha;
 
 use Laminas\ReCaptcha\ReCaptcha as ReCaptchaService;
 use Traversable;
+
+use function array_key_exists;
+use function is_array;
+use function is_int;
+use function is_string;
 
 /**
  * ReCaptcha adapter
@@ -44,13 +43,14 @@ class ReCaptcha extends AbstractAdapter
     /**#@+
      * Error codes
      */
-    const MISSING_VALUE = 'missingValue';
-    const ERR_CAPTCHA   = 'errCaptcha';
-    const BAD_CAPTCHA   = 'badCaptcha';
+    public const MISSING_VALUE = 'missingValue';
+    public const ERR_CAPTCHA   = 'errCaptcha';
+    public const BAD_CAPTCHA   = 'badCaptcha';
     /**#@-*/
 
     /**
      * Error messages
+     *
      * @var array
      */
     protected $messageTemplates = [
@@ -106,8 +106,9 @@ class ReCaptcha extends AbstractAdapter
     /**
      * Retrieve ReCaptcha secret key (BC version)
      *
-     * @return string
      * @deprecated
+     *
+     * @return string
      */
     public function getPrivKey()
     {
@@ -117,8 +118,9 @@ class ReCaptcha extends AbstractAdapter
     /**
      * Retrieve ReCaptcha site key (BC version)
      *
-     * @return string
      * @deprecated
+     *
+     * @return string
      */
     public function getPubKey()
     {
@@ -128,9 +130,10 @@ class ReCaptcha extends AbstractAdapter
     /**
      * Set ReCaptcha secret key (BC version)
      *
+     * @deprecated
+     *
      * @param  string $key
      * @return ReCaptcha Provides a fluent interface
-     * @deprecated
      */
     public function setPrivKey($key)
     {
@@ -140,9 +143,10 @@ class ReCaptcha extends AbstractAdapter
     /**
      * Set ReCaptcha site key (BC version)
      *
+     * @deprecated
+     *
      * @param  string $key
      * @return ReCaptcha Provides a fluent interface
-     * @deprecated
      */
     public function setPubKey($key)
     {
@@ -163,7 +167,7 @@ class ReCaptcha extends AbstractAdapter
         parent::__construct($options);
 
         if (! empty($options)) {
-            if (array_key_exists('secret_key', $options)) {
+            if (array_key_exists('secret_key', $options) && is_string($options['secret_key'])) {
                 $this->getService()->setSecretKey($options['secret_key']);
             }
             if (array_key_exists('site_key', $options)) {
@@ -171,7 +175,7 @@ class ReCaptcha extends AbstractAdapter
             }
 
             // Support pubKey and pubKey for BC
-            if (array_key_exists('privKey', $options)) {
+            if (array_key_exists('privKey', $options) && is_string($options['privKey'])) {
                 $this->getService()->setSecretKey($options['privKey']);
             }
             if (array_key_exists('pubKey', $options)) {
@@ -185,7 +189,6 @@ class ReCaptcha extends AbstractAdapter
     /**
      * Set service object
      *
-     * @param  ReCaptchaService $service
      * @return ReCaptcha Provides a fluent interface
      */
     public function setService(ReCaptchaService $service)
@@ -232,6 +235,7 @@ class ReCaptcha extends AbstractAdapter
      * Generate captcha
      *
      * @see AbstractAdapter::generate()
+     *
      * @return string
      */
     public function generate()
@@ -247,6 +251,7 @@ class ReCaptcha extends AbstractAdapter
      * for this is "g-recaptcha-response"
      *
      * @see    \Laminas\Validator\ValidatorInterface::isValid()
+     *
      * @param  mixed $value
      * @param  mixed $context
      * @return bool

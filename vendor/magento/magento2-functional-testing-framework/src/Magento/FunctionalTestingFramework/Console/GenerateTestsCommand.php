@@ -8,10 +8,14 @@ declare(strict_types = 1);
 namespace Magento\FunctionalTestingFramework\Console;
 
 use Magento\FunctionalTestingFramework\Config\MftfApplicationConfig;
+use Magento\FunctionalTestingFramework\Exceptions\FastFailException;
 use Magento\FunctionalTestingFramework\Exceptions\TestFrameworkException;
+use Magento\FunctionalTestingFramework\Exceptions\TestReferenceException;
 use Magento\FunctionalTestingFramework\Suite\SuiteGenerator;
 use Magento\FunctionalTestingFramework\Test\Handlers\TestObjectHandler;
-use Magento\FunctionalTestingFramework\Util\Manifest\ParallelTestManifest;
+use Magento\FunctionalTestingFramework\Util\GenerationErrorHandler;
+use Magento\FunctionalTestingFramework\Util\Logger\LoggingUtil;
+use Magento\FunctionalTestingFramework\Util\Manifest\ParallelByTimeTestManifest;
 use Magento\FunctionalTestingFramework\Util\Manifest\TestManifestFactory;
 use Magento\FunctionalTestingFramework\Util\TestGenerator;
 use Symfony\Component\Console\Input\InputArgument;
@@ -25,6 +29,8 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  */
 class GenerateTestsCommand extends BaseGenerateCommand
 {
+    const PARALLEL_DEFAULT_TIME = 10;
+
     /**
      * Configures the current command.
      *
@@ -39,13 +45,26 @@ class GenerateTestsCommand extends BaseGenerateCommand
                 'name',
                 InputArgument::OPTIONAL | InputArgument::IS_ARRAY,
                 'name(s) of specific tests to generate'
-            )->addOption("config", 'c', InputOption::VALUE_REQUIRED, 'default, singleRun, or parallel', 'default')
-            ->addOption(
+            )->addOption(
+                "config",
+                'c',
+                InputOption::VALUE_REQUIRED,
+                'default, singleRun, or parallel',
+                'default'
+            )->addOption(
                 'time',
                 'i',
                 InputOption::VALUE_REQUIRED,
-                'Used in combination with a parallel configuration, determines desired group size (in minutes)',
-                10
+                'Used in combination with a parallel configuration, determines desired group size (in minutes)'
+                . PHP_EOL . 'Option "--time" will be the default and the default value is '
+                . self::PARALLEL_DEFAULT_TIME
+                . ' when neither "--time" nor "--groups" is specified'
+            )->addOption(
+                'groups',
+                'g',
+                InputOption::VALUE_REQUIRED,
+                'Used in combination with a parallel configuration, determines desired number of groups'
+                . PHP_EOL . 'Options "--time" and "--groups" are mutually exclusive and only one should be used'
             )->addOption(
                 'tests',
                 't',
@@ -72,8 +91,7 @@ class GenerateTestsCommand extends BaseGenerateCommand
      * @param OutputInterface $output
      * @return void|integer
      * @throws TestFrameworkException
-     * @throws \Magento\FunctionalTestingFramework\Exceptions\TestReferenceException
-     * @throws \Magento\FunctionalTestingFramework\Exceptions\XmlException
+     * @throws FastFailException
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -82,7 +100,9 @@ class GenerateTestsCommand extends BaseGenerateCommand
         $config = $input->getOption('config');
         $json = $input->getOption('tests'); // for backward compatibility
         $force = $input->getOption('force');
-        $time = $input->getOption('time') * 60 * 1000; // convert from minutes to milliseconds
+        $time = $input->getOption('time');
+        //$time = $input->getOption('time') * 60 * 1000; // convert from minutes to milliseconds
+        $groups = $input->getOption('groups');
         $debug = $input->getOption('debug') ?? MftfApplicationConfig::LEVEL_DEVELOPER; // for backward compatibility
         $remove = $input->getOption('remove');
         $verbose = $output->isVerbose();
@@ -116,9 +136,8 @@ class GenerateTestsCommand extends BaseGenerateCommand
             throw new TestFrameworkException("JSON could not be parsed: " . json_last_error_msg());
         }
 
-        if ($config === 'parallel' && $time <= 0) {
-            // stop execution if the user has given us an invalid argument for time argument during parallel generation
-            throw new TestFrameworkException("time option cannot be less than or equal to 0");
+        if ($config === 'parallel') {
+            list($config, $configNumber) = $this->parseConfigParallelOptions($time, $groups);
         }
 
         // Remove previous GENERATED_DIR if --remove option is used
@@ -132,17 +151,35 @@ class GenerateTestsCommand extends BaseGenerateCommand
             // create our manifest file here
             $testManifest = TestManifestFactory::makeManifest($config, $testConfiguration['suites']);
 
-            TestGenerator::getInstance(null, $testConfiguration['tests'])->createAllTestFiles($testManifest);
+            try {
+                if (empty($tests) || !empty($testConfiguration['tests'])) {
+                    // $testConfiguration['tests'] cannot be empty if $tests is not empty
+                    TestGenerator::getInstance(null, $testConfiguration['tests'])->createAllTestFiles($testManifest);
+                } elseif (empty($testConfiguration['suites'])) {
+                    throw new FastFailException(
+                        !empty(GenerationErrorHandler::getInstance()->getAllErrors())
+                            ?
+                            GenerationErrorHandler::getInstance()->getAllErrorMessages()
+                            :
+                            'Invalid input'
+                    );
+                }
+            } catch (FastFailException $e) {
+                throw $e;
+            } catch (\Exception $e) {
+            }
 
-            if ($config == 'parallel') {
-                /** @var ParallelTestManifest $testManifest */
-                $testManifest->createTestGroups($time);
+            if (strpos($config, 'parallel') !== false) {
+                $testManifest->createTestGroups($configNumber);
             }
 
             SuiteGenerator::getInstance()->generateAllSuites($testManifest);
 
             $testManifest->generate();
         } catch (\Exception $e) {
+            if (!empty(GenerationErrorHandler::getInstance()->getAllErrors())) {
+                GenerationErrorHandler::getInstance()->printErrorSummary();
+            }
             $message = $e->getMessage() . PHP_EOL;
             $message .= !empty($filters) ? 'Filter(s): ' . implode(', ', $filters) . PHP_EOL : '';
             $message .= !empty($tests) ? 'Test name(s): ' . implode(', ', $tests) . PHP_EOL : '';
@@ -152,7 +189,14 @@ class GenerateTestsCommand extends BaseGenerateCommand
             return 1;
         }
 
-        $output->writeln("Generate Tests Command Run");
+        if (empty(GenerationErrorHandler::getInstance()->getAllErrors())) {
+            $output->writeln("Generate Tests Command Run" . PHP_EOL);
+            return 0;
+        } else {
+            GenerationErrorHandler::getInstance()->printErrorSummary();
+            $output->writeln("Generate Tests Command Run (with errors)" . PHP_EOL);
+            return 1;
+        }
     }
 
     /**
@@ -161,8 +205,8 @@ class GenerateTestsCommand extends BaseGenerateCommand
      * @param string $json
      * @param array  $tests
      * @return array
-     * @throws \Magento\FunctionalTestingFramework\Exceptions\TestReferenceException
-     * @throws \Magento\FunctionalTestingFramework\Exceptions\XmlException
+     * @throws FastFailException
+     * @throws TestFrameworkException
      */
     private function createTestConfiguration(
         $json,
@@ -179,7 +223,19 @@ class GenerateTestsCommand extends BaseGenerateCommand
             $testObjects = [];
 
             foreach ($testConfiguration['tests'] as $test) {
-                $testObjects[$test] = TestObjectHandler::getInstance()->getObject($test);
+                try {
+                    $testObjects[$test] = TestObjectHandler::getInstance()->getObject($test);
+                } catch (FastFailException $e) {
+                    throw $e;
+                } catch (\Exception $e) {
+                    $message = "Unable to create test object {$test} from test configuration. " . $e->getMessage();
+                    LoggingUtil::getInstance()->getLogger(self::class)->error($message);
+                    if (MftfApplicationConfig::getConfig()->verboseEnabled()
+                        && MftfApplicationConfig::getConfig()->getPhase() == MftfApplicationConfig::GENERATION_PHASE) {
+                        print($message);
+                    }
+                    GenerationErrorHandler::getInstance()->addError('test', $test, $message);
+                }
             }
 
             $testConfiguration['tests'] = $testObjects;
@@ -209,5 +265,48 @@ class GenerateTestsCommand extends BaseGenerateCommand
         ;
         $jsonTestConfiguration['suites'] = $testConfigArray['suites'] ?? null;
         return $jsonTestConfiguration;
+    }
+
+    /**
+     * Parse console command options --time and/or --groups and return config type and config number in an array
+     *
+     * @param mixed $time
+     * @param mixed $groups
+     * @return array
+     * @throws FastFailException
+     */
+    private function parseConfigParallelOptions($time, $groups)
+    {
+        $config = null;
+        $configNumber = null;
+        if ($time !== null && $groups !== null) {
+            throw new FastFailException(
+                "'time' and 'groups' options are mutually exclusive. "
+                . "Only one can be specified for 'config parallel'"
+            );
+        } elseif ($time === null && $groups === null) {
+            $config = 'parallelByTime';
+            $configNumber = self::PARALLEL_DEFAULT_TIME * 60 * 1000; // convert from minutes to milliseconds
+        } elseif ($time !== null && is_numeric($time)) {
+            $time = $time * 60 * 1000; // convert from minutes to milliseconds
+            if (is_int($time) && $time > 0) {
+                $config = 'parallelByTime';
+                $configNumber = $time;
+            }
+        } elseif ($groups !== null && is_numeric($groups)) {
+            $groups = $groups * 1;
+            if (is_int($groups) && $groups > 0) {
+                $config = 'parallelByGroup';
+                $configNumber = $groups;
+            }
+        }
+
+        if ($config && $configNumber) {
+            return [$config, $configNumber];
+        } elseif ($time !== null) {
+            throw new FastFailException("'time' option must be an integer and greater than 0");
+        } else {
+            throw new FastFailException("'groups' option must be an integer and greater than 0");
+        }
     }
 }
