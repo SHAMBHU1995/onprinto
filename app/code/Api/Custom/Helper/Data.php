@@ -44,4 +44,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                     ->load();
         return $collection;
     }
+
+    public function getCategoryProducts($cat)
+    {
+        $collection = $this->_productCollectionFactory->create();
+        $collection->addAttributeToSelect('*');
+        $collection->addCategoriesFilter(['in' => $cat]);
+        return $collection;
+    }
 }

@@ -15,4 +15,11 @@
         </resources>
     </route>
 
+    <route url="/V1/category/product" method="POST">
+        <service class="Api\Custom\Api\CategoryInterface" method="product"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
 </routes>

@@ -5,5 +5,4 @@
     
     <preference for="Api\Custom\Api\CategoryInterface" type="Api\Custom\Model\Category" />
     
-    
 </config>

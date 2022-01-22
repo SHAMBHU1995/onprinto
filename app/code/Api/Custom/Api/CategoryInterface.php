@@ -15,6 +15,6 @@ interface CategoryInterface
      *
      * @return string
      */
-    // public function product();
+    public function product();
 
 }
