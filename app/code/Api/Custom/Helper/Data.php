@@ -42,6 +42,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                     ->addAttributeToFilter('name', array('like' => '%'. $name.'%'))
                     ->addStoreFilter()
                     ->load();
+    
         return $collection;
     }
 

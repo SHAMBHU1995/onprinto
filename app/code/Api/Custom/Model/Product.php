@@ -21,6 +21,7 @@ class Product  implements \Api\Custom\Api\ProductInterface
     $token = isset($json_obj['token'])?$json_obj['token']:null;
     $sku = isset($json_obj['sku'])?$json_obj['sku']:null;
     $name = isset($json_obj['name'])?$json_obj['name']:null;
+    $cat = isset($json_obj['cat'])?$json_obj['cat']:null;
 
     if(!empty($token)){
       $tokenCollection = $this->helperData->authenticateToken($token);
@@ -37,7 +38,7 @@ class Product  implements \Api\Custom\Api\ProductInterface
       $data =  array('code' => $code , 'message' => $message );
       echo json_encode($data);die;
     }
-    if(empty($sku) && empty($name)){
+    if(empty($sku) && empty($name) && empty($cat)){
       $code = 0;
       $message = "Invalid parameter";
       $data =  array('code' => $code , 'message' => $message );
@@ -46,6 +47,16 @@ class Product  implements \Api\Custom\Api\ProductInterface
     $result = [];
     if($sku || $name){
       $collection = $this->helperData->getProducts($sku, $name);
+     
+      foreach($collection as $product){
+        $result[] = $product->getData();
+      }
+      $code = 1;
+      $data =  array('code' => $code , 'product' => $result );
+      echo json_encode($data);die;
+    }
+    if($cat){
+      $collection = $this->helperData->getCategoryProducts($cat);
      
       foreach($collection as $product){
         $result[] = $product->getData();
