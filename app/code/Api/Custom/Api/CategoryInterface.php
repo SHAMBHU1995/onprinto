@@ -10,11 +10,5 @@ interface CategoryInterface
      */
     public function list();
 
-    /**
-     * Undocumented function
-     *
-     * @return string
-     */
-    public function product();
 
 }
