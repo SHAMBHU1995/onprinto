@@ -1,0 +1,1 @@
+"Fatal Error: 'Class Api\\Custom\\Model\\Category contains 1 abstract method and must therefore be declared abstract or implement the remaining methods (Api\\Custom\\Api\\CategoryInterface::product)' in '\/var\/www\/html\/onprinto\/app\/code\/Api\/Custom\/Model\/Category.php' on line 6"
